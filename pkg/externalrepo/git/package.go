@@ -17,8 +17,6 @@ package git
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -30,6 +28,7 @@ import (
 	"github.com/nephio-project/porch/internal/kpt/pkg"
 	kptfile "github.com/nephio-project/porch/pkg/kpt/api/kptfile/v1"
 	"github.com/nephio-project/porch/pkg/repository"
+	"github.com/nephio-project/porch/pkg/util"
 	"go.opentelemetry.io/otel/trace"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,7 +43,7 @@ type gitPackageRevision struct {
 	repo          *gitRepository // repo is repo containing the package
 	path          string         // the path to the package from the repo root
 	revision      string
-	workspaceName v1alpha1.WorkspaceName
+	workspaceName string
 	updated       time.Time
 	updatedBy     string
 	ref           *plumbing.Reference // ref is the Git reference at which the package exists
@@ -69,13 +68,13 @@ func (p *gitPackageRevision) KubeObjectName() string {
 	// as the most recently published package revision, so we need to ensure it has a unique
 	// and unchanging name.
 	var s string
-	if p.revision == string(p.repo.branch) {
-		s = p.revision
+	if p.Key().Revision == string(p.repo.branch) {
+		s = p.Key().Revision
 	} else {
-		s = string(p.workspaceName)
+		s = string(p.Key().WorkspaceName)
 	}
-	hash := sha1.Sum([]byte(fmt.Sprintf("%s:%s:%s", p.repo.name, p.path, s)))
-	return p.repo.name + "-" + hex.EncodeToString(hash[:])
+
+	return util.ComposePkgRevObjName(p.repo.name, p.repo.directory, p.Key().Package, s)
 }
 
 func (p *gitPackageRevision) KubeObjectNamespace() string {

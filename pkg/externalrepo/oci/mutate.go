@@ -36,6 +36,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/stream"
 	"github.com/nephio-project/porch/api/porch/v1alpha1"
 	"github.com/nephio-project/porch/pkg/repository"
+	"github.com/nephio-project/porch/pkg/util"
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -50,7 +51,7 @@ func (r *ociRepository) CreatePackageRevision(ctx context.Context, obj *v1alpha1
 		return nil, err
 	}
 
-	if err := repository.ValidateWorkspaceName(obj.Spec.WorkspaceName); err != nil {
+	if err := util.ValidPkgRevObjName(r.name, "/", packageName, string(obj.Spec.WorkspaceName)); err != nil {
 		return nil, fmt.Errorf("failed to create packagerevision: %w", err)
 	}
 
@@ -286,7 +287,7 @@ func (r *ociRepository) ClosePackageRevisionDraft(ctx context.Context, prd repos
 		return nil, fmt.Errorf("error getting config file: %w", err)
 	}
 
-	return p.parent.buildPackageRevision(ctx, digestName, p.packageName, v1alpha1.WorkspaceName(p.tag.TagStr()), revision, configFile.Created.Time)
+	return p.parent.buildPackageRevision(ctx, digestName, p.packageName, p.tag.TagStr(), revision, configFile.Created.Time)
 }
 
 func constructResourceVersion(t time.Time) string {
