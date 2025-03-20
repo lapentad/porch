@@ -71,8 +71,8 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args:
-          -Dsonar.projectKey=nephio-project_porch
-          -Dsonar.organization=nephio-project
+          -Dsonar.projectKey=lapentad_porch
+          -Dsonar.organization=lapentad
           -Dproject.settings=sonar-project.properties
           -Dsonar.pullrequest.key=${{ fromJson(steps.get_pr_data.outputs.data).number }} 
           -Dsonar.pullrequest.branch=${{ fromJson(steps.get_pr_data.outputs.data).head.ref }} 
@@ -85,6 +85,6 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args:
-          -Dsonar.projectKey=nephio-project_porch
-          -Dsonar.organization=nephio-project
+          -Dsonar.projectKey=lapentad_porch
+          -Dsonar.organization=lapentad
           -Dproject.settings=sonar-project.properties
